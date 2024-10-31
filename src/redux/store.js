@@ -1,15 +1,35 @@
-// src/redux/store.js
-
 import { configureStore } from "@reduxjs/toolkit";
 
-// Поки що використовуємо редюсер який
-// тільки повертає отриманий стан Redux
-const rootReducer = (state, action) => {
-  return state;
+import {
+  persistStore,
+  persistReducer,
+  FLUSH,
+  REHYDRATE,
+  PAUSE,
+  PERSIST,
+  PURGE,
+  REGISTER,
+} from "redux-persist";
+import storage from "redux-persist/lib/storage";
+import contactsReducer from "./contactsSlice";
+import filtersReducer from "./filtersSlice";
+
+const usersConfig = {
+  key: "usersKey",
+  storage,
 };
 
 export const store = configureStore({
-  reducer: rootReducer,
+  reducer: {
+    contacts: persistReducer(usersConfig, contactsReducer),
+    filters: filtersReducer,
+  },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: {
+        ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+      },
+    }),
 });
 
-export default store;
+export const persistor = persistStore(store);
